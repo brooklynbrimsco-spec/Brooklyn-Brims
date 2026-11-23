@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+:root {
+  --cream: #f4efe6;
+  --paper: #ffffff;
+  --navy: #1e3a5f;
+  --navy-deep: #152a46;
+  --ink: #111111;
+  --muted: #6b6b6b;
+  --star: #c81e24;
+  --line: #e8e4dc;
+  --gold: #c5a46e;
+  --sky: #6ea3d6;
+  --footer: #141414;
+}
+
+@theme inline {
+  --color-cream: var(--cream);
+  --color-paper: var(--paper);
+  --color-navy: var(--navy);
+  --color-navy-deep: var(--navy-deep);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-star: var(--star);
+  --color-line: var(--line);
+  --color-gold: var(--gold);
+  --color-sky: var(--sky);
+  --color-footer: var(--footer);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-oswald);
+  --font-serif: var(--font-newsreader);
+  --animate-ticker: ticker 32s linear infinite;
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: max-content;
+  animation: ticker 32s linear infinite;
+}
+
+.shop-marks:hover .ticker-track,
+.shop-marks:focus-within .ticker-track,
+.ticker-track:hover,
+.ticker-track:focus-within {
+  animation-play-state: paused;
+}
+
+.ticker-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track,
+  .animate-ticker {
+    animation: none;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #ffffff;
+  color: var(--ink);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+a {
+  text-underline-offset: 4px;
+}
+
+::selection {
+  background: var(--navy);
+  color: #fff;
+}
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+}
+
+.product-card:hover .product-card-add,
+.product-card:focus-within .product-card-add {
+  opacity: 1;
+}
