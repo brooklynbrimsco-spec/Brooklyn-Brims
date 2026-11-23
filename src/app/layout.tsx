@@ -24,10 +24,11 @@ export const metadata: Metadata = {
     default: "Brooklyn Brims",
     template: "%s · Brooklyn Brims",
   },
-  description:verification: {
-  google: "XcifcQcBTRHcHS9JZfufsBVxvEv5Zr7soxzhMeajBVE",
-},
+  description:
     "Hats from Brooklyn, Connecticut. Est. 2024. Shop the catalog, then check out with Stripe or PayPal.",
+  verification: {
+    google: "XcifcQcBTRHcHS9JZfufsBVxvEv5Zr7soxzhMeajBVE",
+  },
   icons: {
     icon: "/logo.png",
     apple: "/logo.png",
