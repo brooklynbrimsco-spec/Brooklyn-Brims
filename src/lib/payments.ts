@@ -2,7 +2,7 @@ import "server-only";
 
 import { connection } from "next/server";
 import Stripe from "stripe";
-import type { PaymentProviders } from "@/lib/types";
+import type { PaymentProviders, ShippingAddress } from "@/lib/types";
 
 export async function paymentProviders(): Promise<PaymentProviders> {
   await connection();
@@ -19,6 +19,26 @@ export function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY?.trim();
   if (!key) return null;
   return new Stripe(key);
+}
+
+export function shippingFromCheckoutSession(
+  session: Stripe.Checkout.Session,
+): ShippingAddress | null {
+  const details = session.collected_information?.shipping_details;
+  const address = details?.address;
+  const name = details?.name?.trim() ?? "";
+  const line1 = address?.line1?.trim() ?? "";
+  if (!name || !line1) return null;
+  return {
+    name: name.slice(0, 120),
+    phone: session.customer_details?.phone?.trim().slice(0, 40) || null,
+    line1: line1.slice(0, 200),
+    line2: address?.line2?.trim().slice(0, 200) || null,
+    city: address?.city?.trim().slice(0, 100) ?? "",
+    state: address?.state?.trim().slice(0, 40) || null,
+    postalCode: address?.postal_code?.trim().slice(0, 20) ?? "",
+    country: (address?.country?.trim().slice(0, 2).toUpperCase() || "US"),
+  };
 }
 
 function paypalBase(): string {
