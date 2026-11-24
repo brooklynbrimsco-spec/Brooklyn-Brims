@@ -2,7 +2,15 @@ import "server-only";
 
 import { sql } from "@/lib/db";
 import { variantLabel } from "@/lib/catalog";
-import type { CartLineInput, Order, OrderItem, Product, ResolvedLine } from "@/lib/types";
+import { parseShippingJson, stringifyShipping } from "@/lib/shipping";
+import type {
+  CartLineInput,
+  Order,
+  OrderItem,
+  Product,
+  ResolvedLine,
+  ShippingAddress,
+} from "@/lib/types";
 
 type OrderRow = {
   id: string;
@@ -14,6 +22,7 @@ type OrderRow = {
   total_cents: number | string;
   created_at: string | Date;
   paid_at: string | Date | null;
+  shipping_json: string | null;
 };
 
 type ItemRow = {
@@ -56,6 +65,9 @@ function mapOrder(row: OrderRow, items: OrderItem[]): Order {
     totalCents: Number(row.total_cents),
     createdAt: asIso(row.created_at) ?? "",
     paidAt: asIso(row.paid_at),
+    shipping: parseShippingJson(
+      typeof row.shipping_json === "string" ? row.shipping_json : null,
+    ),
     items,
   };
 }
@@ -168,16 +180,19 @@ export async function markOrderPaid(input: {
   stripeSessionId?: string;
   paypalOrderId?: string;
   email?: string | null;
+  shipping?: ShippingAddress | null;
 }): Promise<void> {
   const email = input.email?.trim() || null;
+  const shippingJson = input.shipping ? stringifyShipping(input.shipping) : null;
   if (input.stripeSessionId) {
     await sql(
       `update orders
        set status = 'paid',
            paid_at = coalesce(paid_at, now()),
-           email = coalesce($1, email)
-       where stripe_session_id = $2`,
-      [email, input.stripeSessionId],
+           email = coalesce($1, email),
+           shipping_json = coalesce($2, shipping_json)
+       where stripe_session_id = $3`,
+      [email, shippingJson, input.stripeSessionId],
     );
     return;
   }
@@ -186,9 +201,10 @@ export async function markOrderPaid(input: {
       `update orders
        set status = 'paid',
            paid_at = coalesce(paid_at, now()),
-           email = coalesce($1, email)
-       where paypal_order_id = $2`,
-      [email, input.paypalOrderId],
+           email = coalesce($1, email),
+           shipping_json = coalesce($2, shipping_json)
+       where paypal_order_id = $3`,
+      [email, shippingJson, input.paypalOrderId],
     );
     return;
   }
@@ -197,9 +213,10 @@ export async function markOrderPaid(input: {
       `update orders
        set status = 'paid',
            paid_at = coalesce(paid_at, now()),
-           email = coalesce($1, email)
-       where id = $2`,
-      [email, input.id],
+           email = coalesce($1, email),
+           shipping_json = coalesce($2, shipping_json)
+       where id = $3`,
+      [email, shippingJson, input.id],
     );
   }
 }
