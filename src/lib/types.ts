@@ -63,6 +63,7 @@ export type Order = {
   shipping: ShippingAddress | null;
   items: OrderItem[];
 };
+
 export type OrderItem = {
   id: string;
   productId: string | null;
