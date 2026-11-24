@@ -1,4 +1,4 @@
-import { getStripe } from "@/lib/payments";
+import { getStripe, shippingFromCheckoutSession } from "@/lib/payments";
 import { markOrderPaid } from "@/lib/orders";
 
 export async function POST(request: Request) {
@@ -26,6 +26,7 @@ export async function POST(request: Request) {
         email:
           session.customer_details?.email ??
           (typeof session.customer_email === "string" ? session.customer_email : null),
+        shipping: shippingFromCheckoutSession(session),
       });
     }
   }
