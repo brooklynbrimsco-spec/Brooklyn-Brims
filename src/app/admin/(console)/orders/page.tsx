@@ -1,5 +1,6 @@
 import { listOrders } from "@/lib/orders";
 import { formatUsd } from "@/lib/money";
+import { formatShippingAddress } from "@/lib/shipping";
 
 export const metadata = { title: "Orders" };
 
@@ -38,6 +39,13 @@ export default async function AdminOrdersPage() {
                   </li>
                 ))}
               </ul>
+              {order.shipping ? (
+                <p className="mt-3 whitespace-pre-line text-sm text-navy">
+                  {formatShippingAddress(order.shipping)}
+                </p>
+              ) : (
+                <p className="mt-3 text-xs text-muted">No shipping address yet</p>
+              )}
             </li>
           ))}
         </ul>
