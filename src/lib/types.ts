@@ -39,6 +39,17 @@ export type ResolvedLine = {
   image: string | null;
 };
 
+export type ShippingAddress = {
+  name: string;
+  phone: string | null;
+  line1: string;
+  line2: string | null;
+  city: string;
+  state: string | null;
+  postalCode: string;
+  country: string;
+};
+
 export type Order = {
   id: string;
   provider: "stripe" | "paypal";
@@ -49,9 +60,9 @@ export type Order = {
   totalCents: number;
   createdAt: string;
   paidAt: string | null;
+  shipping: ShippingAddress | null;
   items: OrderItem[];
 };
-
 export type OrderItem = {
   id: string;
   productId: string | null;
