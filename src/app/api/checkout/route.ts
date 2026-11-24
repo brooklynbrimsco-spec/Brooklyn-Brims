@@ -58,8 +58,10 @@ export async function POST(request: Request) {
       mode: "payment",
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/checkout/cancel`,
-      metadata: { orderId },
-      line_items: lines.map((line) => ({
+     metadata: { orderId },
+shipping_address_collection: { allowed_countries: ["US"] },
+phone_number_collection: { enabled: true },
+line_items: lines.map((line) => ({
         quantity: line.quantity,
         price_data: {
           currency: "usd",
