@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getStripe } from "@/lib/payments";
+import { getStripe, shippingFromCheckoutSession } from "@/lib/payments";
 import { markOrderPaid } from "@/lib/orders";
 
 export const metadata = {
@@ -21,6 +21,7 @@ export default async function SuccessPage({
           await markOrderPaid({
             stripeSessionId: session.id,
             email: session.customer_details?.email ?? session.customer_email,
+            shipping: shippingFromCheckoutSession(session),
           });
         }
       } catch {
