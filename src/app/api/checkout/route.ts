@@ -1,3 +1,4 @@
+import { TERMS_ACCEPTANCE_ERROR, TERMS_VERSION } from "@/content/terms";
 import { listPublishedProducts } from "@/lib/catalog";
 import { isSameOrigin, jsonError, requestOrigin } from "@/lib/http";
 import { paypalAmount } from "@/lib/money";
@@ -22,8 +23,13 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     provider?: string;
     items?: unknown;
+    termsAccepted?: unknown;
   } | null;
   if (!body) return jsonError("Invalid request", 400);
+  if (body.termsAccepted !== true) {
+    return jsonError(TERMS_ACCEPTANCE_ERROR, 400);
+  }
+  const termsAcceptedAt = new Date();
   const provider = body.provider === "paypal" ? "paypal" : body.provider === "stripe" ? "stripe" : null;
   if (!provider) return jsonError("Choose Stripe or PayPal.", 400);
 
@@ -49,7 +55,12 @@ export async function POST(request: Request) {
   }
 
   const origin = requestOrigin(request);
-  const orderId = await createPendingOrder({ provider, lines });
+  const orderId = await createPendingOrder({
+    provider,
+    lines,
+    termsVersion: TERMS_VERSION,
+    termsAcceptedAt,
+  });
 
   if (provider === "stripe") {
     const stripe = getStripe();
@@ -58,10 +69,15 @@ export async function POST(request: Request) {
       mode: "payment",
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/checkout/cancel`,
-     metadata: { orderId },
-shipping_address_collection: { allowed_countries: ["US"] },
-phone_number_collection: { enabled: true },
-line_items: lines.map((line) => ({
+      metadata: {
+        orderId,
+        termsVersion: TERMS_VERSION,
+        termsAcceptedAt: termsAcceptedAt.toISOString(),
+        termsAccepted: "true",
+      },
+      shipping_address_collection: { allowed_countries: ["US"] },
+      phone_number_collection: { enabled: true },
+      line_items: lines.map((line) => ({
         quantity: line.quantity,
         price_data: {
           currency: "usd",
