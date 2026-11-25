@@ -2,15 +2,21 @@
 
 import { useState } from "react";
 import { useCart } from "@/components/CartProvider";
+import { TERMS_ACCEPTANCE_ERROR } from "@/content/terms";
 import type { PaymentProviders } from "@/lib/types";
 
 export function CheckoutButtons({ providers }: { providers: PaymentProviders }) {
   const { items, clear } = useCart();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<"stripe" | "paypal" | null>(null);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   async function start(provider: "stripe" | "paypal") {
     setError(null);
+    if (!acceptedTerms) {
+      setError(TERMS_ACCEPTANCE_ERROR);
+      return;
+    }
     setPending(provider);
     try {
       const response = await fetch("/api/checkout", {
@@ -18,6 +24,7 @@ export function CheckoutButtons({ providers }: { providers: PaymentProviders }) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider,
+          termsAccepted: true,
           items: items.map((item) => ({
             productId: item.productId,
             variantId: item.variantId ?? null,
@@ -44,6 +51,29 @@ export function CheckoutButtons({ providers }: { providers: PaymentProviders }) 
 
   return (
     <div className="space-y-3">
+      <label className="flex items-start gap-3 text-sm leading-snug text-muted">
+        <input
+          type="checkbox"
+          checked={acceptedTerms}
+          onChange={(event) => {
+            setAcceptedTerms(event.target.checked);
+            if (event.target.checked) setError(null);
+          }}
+          className="mt-0.5 h-4 w-4 shrink-0 accent-ink"
+        />
+        <span>
+          I have read and agree to the{" "}
+          <a
+            href="/terms"
+            target="_blank"
+            rel="noreferrer"
+            className="text-ink underline"
+          >
+            Terms & Conditions
+          </a>{" "}
+          of Brooklyn Brims Hat Co.
+        </span>
+      </label>
       {providers.stripe ? (
         <button
           type="button"
