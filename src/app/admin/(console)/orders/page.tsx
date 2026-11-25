@@ -46,6 +46,12 @@ export default async function AdminOrdersPage() {
               ) : (
                 <p className="mt-3 text-xs text-muted">No shipping address yet</p>
               )}
+              {order.termsVersion && order.termsAcceptedAt ? (
+                <p className="mt-3 text-xs text-muted">
+                  Terms accepted · {order.termsVersion} ·{" "}
+                  {new Date(order.termsAcceptedAt).toISOString()}
+                </p>
+              ) : null}
             </li>
           ))}
         </ul>
