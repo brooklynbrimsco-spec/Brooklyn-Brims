@@ -23,6 +23,8 @@ type OrderRow = {
   created_at: string | Date;
   paid_at: string | Date | null;
   shipping_json: string | null;
+  terms_version: string | null;
+  terms_accepted_at: string | Date | null;
 };
 
 type ItemRow = {
@@ -68,6 +70,8 @@ function mapOrder(row: OrderRow, items: OrderItem[]): Order {
     shipping: parseShippingJson(
       typeof row.shipping_json === "string" ? row.shipping_json : null,
     ),
+    termsVersion: row.terms_version,
+    termsAcceptedAt: asIso(row.terms_accepted_at),
     items,
   };
 }
@@ -126,19 +130,23 @@ export async function createPendingOrder(input: {
   lines: ResolvedLine[];
   stripeSessionId?: string | null;
   paypalOrderId?: string | null;
+  termsVersion: string;
+  termsAcceptedAt: Date;
 }): Promise<string> {
   const id = crypto.randomUUID();
   const total = linesTotal(input.lines);
   await sql(
     `insert into orders
-      (id, provider, stripe_session_id, paypal_order_id, status, total_cents)
-     values ($1,$2,$3,$4,'pending',$5)`,
+      (id, provider, stripe_session_id, paypal_order_id, status, total_cents, terms_version, terms_accepted_at)
+     values ($1,$2,$3,$4,'pending',$5,$6,$7)`,
     [
       id,
       input.provider,
       input.stripeSessionId ?? null,
       input.paypalOrderId ?? null,
       total,
+      input.termsVersion,
+      input.termsAcceptedAt.toISOString(),
     ],
   );
   for (const line of input.lines) {
