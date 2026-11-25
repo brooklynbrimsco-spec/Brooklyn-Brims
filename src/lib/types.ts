@@ -61,6 +61,8 @@ export type Order = {
   createdAt: string;
   paidAt: string | null;
   shipping: ShippingAddress | null;
+  termsVersion: string | null;
+  termsAcceptedAt: string | null;
   items: OrderItem[];
 };
 
