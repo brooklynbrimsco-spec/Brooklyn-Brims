@@ -128,6 +128,11 @@ export function Footer({
                 </Link>
               </li>
               <li>
+                <Link href="/terms" className="hover:text-white">
+                  Terms & Conditions
+                </Link>
+              </li>
+              <li>
                 <a href={SHOP_EMAIL_MAILTO} className="hover:text-white">
                   {SHOP_EMAIL}
                 </a>
